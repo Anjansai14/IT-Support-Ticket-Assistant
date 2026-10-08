@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IT Support Ticket Assistant | AI Automated Triage</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/styles.css">
+  <!-- Fallback local css link if opened as file or separate server -->
+  <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <header>
+    <div class="brand">
+      <div class="brand-icon">⚡</div>
+      <div>
+        <h1>IT Support Ticket Assistant</h1>
+        <div class="brand-subtitle">Automated AI Triage & Helpdesk Operations</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="badge-status" id="liveStatus">
+        <span class="pulse-dot"></span>
+        <span id="statusText">System Healthy</span>
+      </div>
+      <a href="/docs" target="_blank" class="nav-btn" id="docsLink">
+        <span>📖 Swagger API Docs</span>
+      </a>
+      <a href="/health" target="_blank" class="nav-btn" id="healthLink">
+        <span>💓 Health Check</span>
+      </a>
+      <button class="nav-btn" onclick="fetchData()" id="refreshBtn">
+        <span>🔄 Refresh</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <main>
+
+    <!-- Operational Statistics -->
+    <section class="stats-grid" id="statsContainer">
+      <div class="stat-card">
+        <div class="stat-info">
+          <p>Total Tickets</p>
+          <h2 id="statTotal">--</h2>
+        </div>
+        <div class="stat-icon" style="background: rgba(99, 102, 241, 0.15); color: #818cf8;">📋</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-info">
+          <p>Open Queue</p>
+          <h2 id="statOpen">--</h2>
+        </div>
+        <div class="stat-icon" style="background: rgba(59, 130, 246, 0.15); color: #60a5fa;">🚀</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-info">
+          <p>In Progress</p>
+          <h2 id="statInProgress">--</h2>
+        </div>
+        <div class="stat-icon" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24;">⚙️</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-info">
+          <p>Resolved</p>
+          <h2 id="statResolved">--</h2>
+        </div>
+        <div class="stat-icon" style="background: rgba(16, 185, 129, 0.15); color: #34d399;">✅</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-info">
+          <p>Critical Priority</p>
+          <h2 id="statCritical">--</h2>
+        </div>
+        <div class="stat-icon" style="background: rgba(244, 63, 94, 0.15); color: #fb7185;">🔥</div>
+      </div>
+    </section>
+
+    <!-- Layout Split: Form & Queue -->
+    <div class="layout-split">
+
+      <!-- Left Panel: Create Ticket -->
+      <section class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title">
+            <span>✨</span> Submit Support Ticket
+          </h2>
+        </div>
+
+        <!-- Quick Fill Templates -->
+        <div class="templates-section">
+          <div class="templates-label">Quick Test Scenarios:</div>
+          <div class="template-chips">
+            <button class="chip-btn" onclick="fillTemplate('vpn')">🔒 VPN Outage</button>
+            <button class="chip-btn" onclick="fillTemplate('password')">🔑 Locked Account</button>
+            <button class="chip-btn" onclick="fillTemplate('phishing')">🚨 Phishing Attack</button>
+            <button class="chip-btn" onclick="fillTemplate('hardware')">💻 Broken Screen</button>
+          </div>
+        </div>
+
+        <form id="ticketForm" onsubmit="handleFormSubmit(event)">
+          <div class="form-group">
+            <label for="employeeName">Employee Full Name</label>
+            <input type="text" id="employeeName" class="form-input" placeholder="e.g. Anjan Sai" required>
+          </div>
+
+          <div class="form-group">
+            <label for="employeeEmail">Corporate Email Address</label>
+            <input type="email" id="employeeEmail" class="form-input" placeholder="e.g. anjan@company.com" required>
+          </div>
+
+          <div class="form-group">
+            <label for="issueDescription">Issue Details (Min 10 characters)</label>
+            <textarea id="issueDescription" class="form-textarea" placeholder="Describe the technical issue, device symptoms, or urgency..." required></textarea>
+          </div>
+
+          <button type="submit" class="btn-submit" id="submitBtn">
+            <span>🚀 Run AI Triage & Submit Ticket</span>
+          </button>
+        </form>
+
+        <!-- AI Preview Box -->
+        <div class="ai-result-box" id="aiResultBox">
+          <div class="ai-result-title">
+            <span>🤖 AI Automated Classification</span>
+          </div>
+          <div id="aiResultDetails" style="font-size: 0.85rem; line-height: 1.6;"></div>
+        </div>
+      </section>
+
+      <!-- Right Panel: Tickets Queue -->
+      <section class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title">
+            <span>📂</span> Live Operations Queue
+          </h2>
+          <span id="queueCount" style="font-size: 0.825rem; color: var(--text-muted); font-weight: 600;">0 Tickets</span>
+        </div>
+
+        <!-- Filter Controls -->
+        <div class="queue-controls">
+          <div class="filter-tabs">
+            <button class="tab-btn active" onclick="setFilter('status', '', this)">All</button>
+            <button class="tab-btn" onclick="setFilter('status', 'Open', this)">Open</button>
+            <button class="tab-btn" onclick="setFilter('status', 'In Progress', this)">In Progress</button>
+            <button class="tab-btn" onclick="setFilter('status', 'Resolved', this)">Resolved</button>
+          </div>
+
+          <input type="text" id="searchInput" class="search-input" placeholder="🔍 Search tickets..." oninput="handleSearch(this.value)">
+        </div>
+
+        <!-- Ticket Cards List -->
+        <div class="tickets-list" id="ticketsList">
+          <div class="empty-state">
+            <div class="empty-state-icon">⏳</div>
+            <p>Loading active tickets...</p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="/static/js/app.js"></script>
+  <!-- Fallback local script link if opened as file or separate server -->
+  <script src="./js/app.js"></script>
+</body>
+</html>

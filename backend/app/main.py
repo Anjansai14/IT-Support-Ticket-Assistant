@@ -1,9 +1,13 @@
 """
 Main application module and entry point for the FastAPI server.
 """
+import os
+from pathlib import Path
 import logging
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
 from app.config import settings
 from app.database import engine, Base
@@ -17,6 +21,12 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
 )
 logger = logging.getLogger("it-support-ticket-assistant")
+
+# Locate separate frontend directory
+FRONTEND_DIR = Path(__file__).resolve().parent.parent.parent / "frontend"
+if not FRONTEND_DIR.exists():
+    FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
+
 
 
 @asynccontextmanager
@@ -74,12 +84,32 @@ app.include_router(tickets.router, prefix="/tickets", tags=["Tickets"])
 # Register centralized exception handlers
 setup_exception_handlers(app)
 
+# Mount separate frontend assets directory
+if FRONTEND_DIR.exists():
+    app.mount("/static", StaticFiles(directory=str(FRONTEND_DIR)), name="static")
+
 
 @app.get("/", tags=["General"])
-def root():
+def root(request: Request):
     """
-    Root endpoint providing welcome metadata and documentation links.
+    Root endpoint serving interactive web UI dashboard, or API metadata for JSON clients.
     """
+    index_file = FRONTEND_DIR / "index.html"
+    accept_header = request.headers.get("accept", "")
+    
+    # If explicitly requested JSON only without html support
+    if "application/json" in accept_header and "text/html" not in accept_header:
+        return {
+            "message": f"Welcome to {settings.PROJECT_NAME}",
+            "version": settings.PROJECT_VERSION,
+            "docs_url": "/docs",
+            "health_check": "/health"
+        }
+
+    # Serve the visual web dashboard
+    if index_file.exists():
+        return FileResponse(index_file)
+
     return {
         "message": f"Welcome to {settings.PROJECT_NAME}",
         "version": settings.PROJECT_VERSION,

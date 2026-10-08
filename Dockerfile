@@ -9,12 +9,13 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 
 # Install dependencies in a separate layer for optimal caching
-COPY requirements.txt /app/requirements.txt
+COPY backend/requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# Copy application source code
-COPY ./app /app/app
+# Copy backend application source code and frontend assets
+COPY ./backend/app /app/app
+COPY ./frontend /app/frontend
 
 # Create a non-root system user for security compliance
 RUN useradd -m -u 1000 appuser && \

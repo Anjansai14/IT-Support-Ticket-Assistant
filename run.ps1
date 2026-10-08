@@ -28,9 +28,5 @@ if (-not (Test-Path $envFile) -and (Test-Path $envExample)) {
     Write-Host "Initialized backend/.env file from template." -ForegroundColor DarkCyan
 }
 
-# 3. Start server
-$backendDir = Join-Path $rootDir "backend"
-Set-Location $backendDir
-
-Write-Host "Launching server on http://localhost:8000 ..." -ForegroundColor Green
-& $venvPython -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+# 3. Start server using universal run.py
+& $venvPython run.py

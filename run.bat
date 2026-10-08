@@ -28,9 +28,7 @@ if not exist "backend\.env" (
     )
 )
 
-REM 3. Navigate to backend and run uvicorn
-cd /d "%~dp0backend"
-echo Launching FastAPI server on http://localhost:8000 ...
-"..\.venv\Scripts\python.exe" -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+REM 3. Launch server using universal run.py
+".venv\Scripts\python.exe" run.py
 
 pause

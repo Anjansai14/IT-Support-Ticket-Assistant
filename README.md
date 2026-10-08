@@ -39,24 +39,39 @@ it-support-ticket-assistant/
 
 ---
 
-## 🚀 Getting Started in VS Code (After Git Clone)
+## 💻 Universal IDE Support
+
+This repository works out-of-the-box in **any IDE** on **Windows, macOS, and Linux**:
+
+| IDE / Environment | How to Run |
+| :--- | :--- |
+| **VS Code & Cursor** | Press <kbd>F5</kbd> (Run & Debug) OR run `.\run.bat` / `.\run.ps1` in terminal |
+| **PyCharm / IntelliJ** | Right-click `run.py` and click **"Run 'run'"** |
+| **Universal Terminal** | `python run.py` (automatically loads paths and runs server) |
+| **Windows Explorer** | Double-click `run.bat` |
+| **macOS / Linux / WSL** | `./run.sh` |
+
+---
+
+## 🚀 Getting Started (After Git Clone)
 
 When you clone a repository from Git, the Python virtual environment (`.venv`) and `.env` files are not included by design (they are ignored by Git). Follow these steps to run the project:
 
 ### Method 1: Automatic 1-Click Setup (Recommended)
 
-In your VS Code terminal (or by double-clicking the file in File Explorer), run:
+In your terminal (or by double-clicking the file in File Explorer), run:
 
 ```bat
 .\run.bat
 ```
-*(or in PowerShell: `.\run.ps1`)*
+*(PowerShell: `.\run.ps1` | macOS/Linux: `./run.sh`)*
 
 > **What this does automatically:**
 > 1. Detects if `.venv` is missing and creates it (`python -m venv .venv`).
 > 2. Installs all required packages from `backend/requirements.txt`.
 > 3. Creates `backend/.env` from `backend/.env.example`.
 > 4. Starts the server at **http://localhost:8000** with hot reload.
+
 
 ---
 

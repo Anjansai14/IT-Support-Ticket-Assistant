@@ -4,14 +4,33 @@ echo ========================================================
 echo Starting IT Support Ticket Assistant Backend & Frontend...
 echo ========================================================
 
-cd /d "%~dp0backend"
+cd /d "%~dp0"
 
-if exist "..\.venv\Scripts\python.exe" (
-    echo Using project virtual environment [.venv]...
-    "..\.venv\Scripts\python.exe" -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-) else (
-    echo [WARNING] .venv not found. Falling back to system python...
-    python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+REM 1. Check and auto-create virtual environment if missing
+if not exist ".venv\Scripts\python.exe" (
+    echo [.venv not found] Creating virtual environment...
+    python -m venv .venv
+    if errorlevel 1 (
+        echo [ERROR] Python is not found in your system PATH. Please install Python 3.10+ from python.org
+        pause
+        exit /b 1
+    )
+    echo Installing dependencies from backend\requirements.txt...
+    ".venv\Scripts\python.exe" -m pip install --upgrade pip
+    ".venv\Scripts\python.exe" -m pip install -r backend\requirements.txt
 )
+
+REM 2. Create .env if it doesn't exist
+if not exist "backend\.env" (
+    if exist "backend\.env.example" (
+        copy "backend\.env.example" "backend\.env" >nul
+        echo Initialized backend\.env configuration file.
+    )
+)
+
+REM 3. Navigate to backend and run uvicorn
+cd /d "%~dp0backend"
+echo Launching FastAPI server on http://localhost:8000 ...
+"..\.venv\Scripts\python.exe" -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
 pause
